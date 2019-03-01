@@ -20,7 +20,8 @@ setup(
     long_description=readme,
     install_requires=[
         "beautifulsoup4 >= 4.6.0",
-        "python-dateutil >= 2.4.2"
+        "python-dateutil >= 2.4.2",
+        "dateparser >= 0.7.0"
     ],
     classifiers=(
         'Development Status :: 4 - Beta',
