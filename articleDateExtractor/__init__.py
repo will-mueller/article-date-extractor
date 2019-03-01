@@ -1,8 +1,14 @@
 __author__ = 'Ran Geva'
 
-import re,json
+import logging
+import re
+import json
+from datetime import timezone
+
 from dateutil.parser import parse
 from dateparser.search import search_dates
+
+logger = logging.getLogger(__name__)
 
 #try except for different urllib under python3 and python2
 try:
@@ -206,7 +212,8 @@ def _extractFromHTMLTag(parsedHTML):
         
         try:
             possibleDate = search_dates(dateText)[0][1].date()
-        except Exception:
+        except Exception as e:
+            logger.debug("Exception occurred while extracting date with 'search_dates': {}".format(str(e)))
             possibleDate = None
 
         if possibleDate is not None:
@@ -226,8 +233,9 @@ def _extractFromHTMLTag(parsedHTML):
         dateText = clean_tag_text(dateText)
         
         try:
-            possibleDate = search_dates(dateText)[0][1].date()
+            possibleDate = search_dates(dateText)[0][1].replace(tzinfo=timezone.utc)
         except Exception:
+            
             possibleDate = None
 
         if possibleDate is not None:
