@@ -2,6 +2,7 @@ __author__ = 'Ran Geva'
 
 import re,json
 from dateutil.parser import parse
+from dateparser.search import search_dates
 
 #try except for different urllib under python3 and python2
 try:
@@ -15,7 +16,9 @@ try:
 except ImportError:
     from BeautifulSoup import BeautifulSoup
 
-
+def clean_tag_text(tag_text):
+    tag_text = tag_text.replace("\n", " ").replace("\t", " ")
+    return re.sub("\s+", " ", tag_text).strip()
 
 def parseStrDate(dateString):
     try:
@@ -195,10 +198,16 @@ def _extractFromHTMLTag(parsedHTML):
     date_list = []
     for tag in parsedHTML.find_all(['span', 'p','div'], class_=re.compile("pubdate|timestamp|article_date|articledate|date|posted-on",re.IGNORECASE)):
         dateText = tag.string
+        
         if dateText is None:
             dateText = tag.text
-
-        possibleDate = parseStrDate(dateText)
+            
+        dateText = clean_tag_text(dateText)
+        
+        try:
+            possibleDate = search_dates(dateText)[0][1].date()
+        except Exception:
+            possibleDate = None
 
         if possibleDate is not None:
             date_list.append(possibleDate)
@@ -210,10 +219,16 @@ def _extractFromHTMLTag(parsedHTML):
     date_list = []
     for tag in parsedHTML.find_all(['span', 'p','div'], id=re.compile("pubdate|timestamp|article_date|articledate|date|posted-on",re.IGNORECASE)):
         dateText = tag.string
+        
         if dateText is None:
             dateText = tag.text
-
-        possibleDate = parseStrDate(dateText)
+            
+        dateText = clean_tag_text(dateText)
+        
+        try:
+            possibleDate = search_dates(dateText)[0][1].date()
+        except Exception:
+            possibleDate = None
 
         if possibleDate is not None:
             date_list.append(possibleDate)
