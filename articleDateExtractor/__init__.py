@@ -153,9 +153,6 @@ def _extractFromMeta(parsedHTML):
             metaDate = meta['content'].strip()
             break
 
-
-
-
         #<meta property="og:image" content="http://www.dailytimes.com.pk/digital_images/400/2015-11-26/norway-return-number-of-asylum-seekers-to-pakistan-1448538771-7363.jpg"/>
         if 'og:image' == metaProperty or "image" == itemProp:
             url = meta['content'].strip()
@@ -195,7 +192,8 @@ def _extractFromHTMLTag(parsedHTML):
             return parseStrDate(dateText)
 
     #class=
-    for tag in parsedHTML.find_all(['span', 'p','div'], class_=re.compile("pubdate|timestamp|article_date|articledate|date",re.IGNORECASE)):
+    date_list = []
+    for tag in parsedHTML.find_all(['span', 'p','div'], class_=re.compile("pubdate|timestamp|article_date|articledate|date|posted-on",re.IGNORECASE)):
         dateText = tag.string
         if dateText is None:
             dateText = tag.text
@@ -203,21 +201,38 @@ def _extractFromHTMLTag(parsedHTML):
         possibleDate = parseStrDate(dateText)
 
         if possibleDate is not None:
-            return  possibleDate
+            date_list.append(possibleDate)
 
+    if date_list != []:
+        return min(date_list)
 
+    #id=
+    date_list = []
+    for tag in parsedHTML.find_all(['span', 'p','div'], id=re.compile("pubdate|timestamp|article_date|articledate|date|posted-on",re.IGNORECASE)):
+        dateText = tag.string
+        if dateText is None:
+            dateText = tag.text
+
+        possibleDate = parseStrDate(dateText)
+
+        if possibleDate is not None:
+            date_list.append(possibleDate)
+
+    if date_list != []:
+        return min(date_list)
 
     return None
 
 
 def extractArticlePublishedDate(articleLink, html = None):
 
-    print("Extracting date from " + articleLink)
-
     articleDate = None
 
     try:
         articleDate = _extractFromURL(articleLink)
+
+        if articleDate is not None:
+            return articleDate
 
         if html is None:
             request = urllib.Request(articleLink)
@@ -248,5 +263,3 @@ def extractArticlePublishedDate(articleLink, html = None):
 if __name__ == '__main__':
     d = extractArticlePublishedDate("http://techcrunch.com/2015/11/30/atlassian-share-price/")
     print(d)
-
-    
