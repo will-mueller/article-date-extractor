@@ -211,7 +211,7 @@ def _extractFromHTMLTag(parsedHTML):
         dateText = clean_tag_text(dateText)
         
         try:
-            possibleDate = search_dates(dateText)[0][1].date()
+            possibleDate = search_dates(dateText)[0][1].replace(tzinfo=timezone.utc)
         except Exception as e:
             logger.debug("Exception occurred while extracting date with 'search_dates': {}".format(str(e)))
             possibleDate = None
@@ -234,8 +234,8 @@ def _extractFromHTMLTag(parsedHTML):
         
         try:
             possibleDate = search_dates(dateText)[0][1].replace(tzinfo=timezone.utc)
-        except Exception:
-            
+        except Exception as e:
+            logger.debug("Exception occurred while extracting date with 'search_dates': {}".format(str(e)))
             possibleDate = None
 
         if possibleDate is not None:
